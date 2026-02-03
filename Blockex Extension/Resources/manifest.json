@@ -22,7 +22,7 @@
   "content_scripts": [
     {
       "js": ["content.js"],
-      "matches": ["*://example.com/*"]
+      "matches": ["<all_urls>"]
     }
   ],
 
