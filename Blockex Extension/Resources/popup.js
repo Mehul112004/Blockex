@@ -155,3 +155,97 @@ function setStorage(obj) {
     });
   });
 }
+
+const hideAccordionHeader = document.getElementById("hideAccordionHeader");
+const hideAccordionContent = document.getElementById("hideAccordionContent");
+const hiddenList = document.getElementById("hiddenList");
+const hiddenEmptyState = document.getElementById("hiddenEmptyState");
+
+const HIDE_OPTIONS = {
+  "youtube-shorts": "YouTube Shorts",
+};
+
+document.addEventListener("DOMContentLoaded", loadHiddenFeatures);
+
+hideAccordionHeader.addEventListener("click", () => {
+  hideAccordionHeader.classList.toggle("open");
+  hideAccordionContent.classList.toggle("hidden");
+});
+
+document.querySelectorAll(".hide-option").forEach((option) => {
+  option.addEventListener("click", () => toggleHideOption(option));
+});
+
+async function loadHiddenFeatures() {
+  const data = await getStorage("hiddenFeatures");
+  const features = data.hiddenFeatures || [];
+
+  // Update UI checkboxes
+  document.querySelectorAll(".hide-option").forEach((option) => {
+    const feature = option.dataset.feature;
+    if (features.includes(feature)) {
+      option.classList.add("selected");
+    }
+  });
+
+  renderHiddenList(features);
+}
+
+async function toggleHideOption(optionEl) {
+  const feature = optionEl.dataset.feature;
+  const data = await getStorage("hiddenFeatures");
+  let features = data.hiddenFeatures || [];
+
+  if (features.includes(feature)) {
+    features = features.filter((f) => f !== feature);
+    optionEl.classList.remove("selected");
+  } else {
+    features.push(feature);
+    optionEl.classList.add("selected");
+  }
+
+  await setStorage({ hiddenFeatures: features });
+  renderHiddenList(features);
+}
+
+function renderHiddenList(features) {
+  hiddenList.innerHTML = "";
+
+  if (features.length === 0) {
+    hiddenEmptyState.classList.remove("hidden");
+    hiddenList.classList.add("hidden");
+  } else {
+    hiddenEmptyState.classList.add("hidden");
+    hiddenList.classList.remove("hidden");
+
+    features.forEach((feature) => {
+      const li = document.createElement("li");
+      li.textContent = HIDE_OPTIONS[feature] || feature;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.className = "remove-btn";
+      removeBtn.innerHTML = "&times;";
+      removeBtn.title = "Remove";
+      removeBtn.onclick = () => removeHiddenFeature(feature);
+
+      li.appendChild(removeBtn);
+      hiddenList.appendChild(li);
+    });
+  }
+}
+
+async function removeHiddenFeature(feature) {
+  const data = await getStorage("hiddenFeatures");
+  let features = data.hiddenFeatures || [];
+
+  features = features.filter((f) => f !== feature);
+
+  // Update checkbox
+  const optionEl = document.querySelector(
+    `.hide-option[data-feature="${feature}"]`,
+  );
+  if (optionEl) optionEl.classList.remove("selected");
+
+  await setStorage({ hiddenFeatures: features });
+  renderHiddenList(features);
+}

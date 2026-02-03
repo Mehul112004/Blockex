@@ -85,3 +85,79 @@ observer.observe(document, { subtree: true, childList: true });
 
 // Also listen for popstate just in case
 window.addEventListener("popstate", checkAndBlock);
+
+// === Hide Feature ===
+async function checkAndHide() {
+  const data = await getStorage("hiddenFeatures");
+  const features = data.hiddenFeatures || [];
+
+  if (features.includes("youtube-shorts")) {
+    hideYouTubeShorts();
+  }
+}
+
+function hideYouTubeShorts() {
+  const url = window.location.href;
+
+  // Only run on YouTube
+  if (!url.includes("youtube.com")) return;
+
+  // Do NOT hide on search results page
+  if (url.includes("/results")) return;
+
+  // Selectors for Shorts elements on YouTube
+  const shortsSelectors = [
+    // Shorts shelf on homepage
+    "ytd-rich-section-renderer[is-shorts]",
+    "ytd-reel-shelf-renderer",
+    // Shorts in sidebar on watch page
+    "ytd-reel-shelf-renderer",
+    // Individual shorts in various places
+    '[href*="/shorts/"]',
+    // Shorts tab in channel pages
+    'yt-tab-shape[tab-title="Shorts"]',
+    // Mini shorts player
+    "ytd-shorts",
+  ];
+
+  shortsSelectors.forEach((selector) => {
+    document.querySelectorAll(selector).forEach((el) => {
+      // For links, hide their parent container
+      if (el.tagName === "A" || el.hasAttribute("href")) {
+        const container =
+          el.closest("ytd-rich-item-renderer") ||
+          el.closest("ytd-video-renderer") ||
+          el.closest("ytd-grid-video-renderer") ||
+          el.closest("ytd-compact-video-renderer") ||
+          el;
+        if (container) {
+          container.style.display = "none";
+        }
+      } else {
+        el.style.display = "none";
+      }
+    });
+  });
+}
+
+// Initial hide check
+checkAndHide();
+
+// Observe for new elements
+const hideObserver = new MutationObserver(() => {
+  checkAndHide();
+});
+
+hideObserver.observe(document, { subtree: true, childList: true });
+
+// Re-check on URL change (SPA navigation)
+let lastHideUrl = window.location.href;
+const urlHideObserver = new MutationObserver(() => {
+  const url = window.location.href;
+  if (url !== lastHideUrl) {
+    lastHideUrl = url;
+    checkAndHide();
+  }
+});
+
+urlHideObserver.observe(document, { subtree: true, childList: true });
