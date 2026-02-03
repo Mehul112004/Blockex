@@ -1,11 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="popup.css">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="popup.css" />
     <script type="module" src="popup.js"></script>
-</head>
-<body>
-    <strong>Hello World!</strong>
-</body>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Blockex</h1>
+      <div class="input-group">
+        <input type="text" id="urlInput" placeholder="example.com" />
+        <button id="blockBtn">Block</button>
+      </div>
+      <div id="errorMsg" class="hidden error"></div>
+
+      <h2>Blocked Sites</h2>
+      <ul id="blockedList">
+        <!-- List items will be injected here -->
+      </ul>
+      <div id="emptyState" class="hidden empty-state">
+        No sites blocked yet.
+      </div>
+    </div>
+  </body>
 </html>
