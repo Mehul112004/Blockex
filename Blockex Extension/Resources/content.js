@@ -35,15 +35,28 @@ function isUrlBlocked(currentUrl, pattern) {
 }
 
 function blockPage() {
+  // Stop any active loading immediately
+  try {
+    window.stop();
+  } catch (e) {}
+
+  // Find and stop all media elements BEFORE nuking the DOM
+  const media = document.querySelectorAll("video, audio");
+  media.forEach((m) => {
+    try {
+      m.pause();
+      m.muted = true;
+      m.src = "";
+      m.remove();
+    } catch (e) {}
+  });
+
   document.body.innerHTML = `
         <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f0f0f0; flex-direction: column; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
             <h1 style="color: #333; font-size: 24px; margin-bottom: 16px;">Page Blocked</h1>
             <p style="color: #666;">This page has been blocked by Blockex.</p>
         </div>
     `;
-  // Stop media playback
-  const media = document.querySelectorAll("video, audio");
-  media.forEach((m) => m.pause());
 }
 
 // Storage wrapper
